@@ -1,20 +1,8 @@
 /* Welcome to the SQL mini project. You will carry out this project partly in
 the PHPMyAdmin interface, and partly in Jupyter via a Python connection.
 
-This is Tier 2 of the case study, which means that there'll be less guidance for you about how to setup
-your local SQLite connection in PART 2 of the case study. This will make the case study more challenging for you: 
-you might need to do some digging, aand revise the Working with Relational Databases in Python chapter in the previous resource.
-
-Otherwise, the questions in the case study are exactly the same as with Tier 1. 
-
 PART 1: PHPMyAdmin
 You will complete questions 1-9 below in the PHPMyAdmin interface. 
-Log in by pasting the following URL into your browser, and
-using the following Username and Password:
-
-URL: https://sql.springboard.com/
-Username: student
-Password: learn_sql@springboard
 
 The data you need is in the "country_club" database. This database
 contains 3 tables:
@@ -154,23 +142,74 @@ for the following questions.  */
 The output of facility name and total revenue, sorted by revenue. Remember
 that there's a different cost for guests and members! */
 
-    df1 = pd.read_sql_query("SELECT f.name as facilityname, SUM(CASE WHEN memid = 0 THEN guestcost*slots ELSE membercost*slots END) AS totalrevenue FROM Bookings AS b LEFT JOIN Facilities AS f USING (facid) GROUP BY facilityname ORDER BY totalrevenue DESC" , conn)
+    df1 = pd.read_sql_query("SELECT 
+                                f.name as facilityname, 
+                                SUM(CASE WHEN memid = 0 THEN guestcost*slots ELSE membercost*slots END) AS totalrevenue 
+                            FROM 
+                                Bookings AS b 
+                            LEFT JOIN 
+                                Facilities AS f USING (facid) 
+                            GROUP BY 
+                                facilityname 
+                            ORDER BY 
+                                totalrevenue DESC", 
+                            conn)
     df1
 
 /* Q11: Produce a report of members and who recommended them in alphabetic surname,firstname order */
 
-    df2 = pd.read_sql_query("SELECT m1.surname || ', ' || m1.firstname as membername, m2.surname || ', ' || m2.firstname AS recommendername FROM Members as m1 LEFT JOIN Members as m2 ON m1.recommendedby = m2.memid ORDER BY membername", conn)
+    df2 = pd.read_sql_query("SELECT 
+                                m1.surname || ', ' || m1.firstname as membername, 
+                                m2.surname || ', ' || m2.firstname AS recommendername 
+                            FROM 
+                                Members as m1 
+                            LEFT JOIN 
+                                Members as m2 ON m1.recommendedby = m2.memid 
+                            ORDER BY 
+                                membername", 
+                            conn)
     df2
 
 /* Q12: Find the facilities with their usage by member, but not guests */
 
-    df4 = pd.read_sql_query("SELECT f.name as facilityname, hrsbooked FROM (SELECT facid, SUM(CASE WHEN memid <> 0 THEN slots/2.0 ELSE null END) AS hrsbooked FROM Bookings GROUP BY facid) AS subquery LEFT JOIN Facilities as f ON subquery.facid = f.facid ORDER BY hrsbooked DESC", conn)
+    df4 = pd.read_sql_query("SELECT 
+                                f.name as facilityname, 
+                                hrsbooked 
+                            FROM (SELECT 
+                                    facid, 
+                                    SUM(CASE WHEN memid <> 0 THEN slots/2.0 ELSE null END) AS hrsbooked 
+                                  FROM Bookings  
+                                  GROUP BY 
+                                    facid) AS subquery 
+                            LEFT JOIN 
+                                Facilities as f ON subquery.facid = f.facid 
+                            ORDER BY 
+                                hrsbooked DESC", 
+                            conn)
     df4
 
 
 /* Q13: Find the facilities usage by month, but not guests */
 
-    df5 = pd.read_sql_query("SELECT f.name as facilityname, month, SUM(hrsbooked) AS bookedhrs FROM (SELECT bookid, facid, strftime('%m', starttime) AS month, CASE WHEN memid <> 0 THEN slots/2.0 ELSE null END AS hrsbooked FROM Bookings) AS subquery LEFT JOIN Facilities as f ON subquery.facid = f.facid GROUP BY facilityname, month ORDER BY month, bookedhrs DESC", conn)
+    df5 = pd.read_sql_query("SELECT 
+                                f.name as facilityname, 
+                                month, SUM(hrsbooked) AS bookedhrs 
+                            FROM (
+                                SELECT 
+                                    bookid, 
+                                    facid, 
+                                    strftime('%m', starttime) AS month, 
+                                    CASE WHEN memid <> 0 THEN slots/2.0 ELSE null END AS hrsbooked 
+                                FROM 
+                                    Bookings
+                                ) AS subquery 
+                            LEFT JOIN 
+                                Facilities as f ON subquery.facid = f.facid 
+                            GROUP BY 
+                                facilityname, 
+                                month ORDER BY month, 
+                                bookedhrs DESC", 
+                            conn)
     df5
 
 
